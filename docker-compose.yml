@@ -1,42 +1,36 @@
 version: "3.8"
 services:
-  mongodb:
-    image: mongo
-    container_name: mongodb
-    volumes:
-      - mongodb-data:/data/db
-      - mongodb-config:/data/configdb
-      - mongodb-init:/docker-entrypoint-initdb.d
-      - mongodb-log:/var/log/mongodb
-      - mongodb-etc:/etc/mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=managiaadmin
-      - MONGO_INITDB_ROOT_PASSWORD=managiapassword
-      - MONGO_INITDB_DATABASE=webapi
-    networks:
-      - managia-network
+  # mongodb:
+  #   image: mongo
+  #   container_name: mongodb
+  #   volumes:
+  #     - mongodb-data:/data/db
+  #     - mongodb-config:/data/configdb
+  #     - mongodb-init:/docker-entrypoint-initdb.d
+  #     - mongodb-log:/var/log/mongodb
+  #     - mongodb-etc:/etc/mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=managiaadmin
+  #     - MONGO_INITDB_ROOT_PASSWORD=managiapassword
+  #     - MONGO_INITDB_DATABASE=webapi
+  #   networks:
+  #     - managia-network
 
   fastapi:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: api
-    environment:
-        - MONGO_URI=mongodb://managiaadmin:managiapassword@mongodb:27017/webapi
-        - MONGO_DB=webapi
-        - MONGO_COLLECTION=managia
-        - MONGO_INITDB_ROOT_USERNAME=managiaadmin
-        - MONGO_INITDB_ROOT_PASSWORD=managiapassword
     ports:
       - "8002:8002"
     volumes:
       - './:/app/'
-    depends_on:
-      - mongodb
-    networks:
-      - managia-network
+    # depends_on:
+    #   - mongodb
+    # networks:
+    #   - managia-network
 
 
 

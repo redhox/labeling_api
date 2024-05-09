@@ -10,7 +10,7 @@ ARG REQUIREMENTS_FILE=requirements.txt
 COPY $REQUIREMENTS_FILE /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
-
+RUN pip install pydantic_settings
 # Copier les fichiers source de l'application
 COPY app /app/app
 COPY ../.env /app/.env

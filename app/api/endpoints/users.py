@@ -14,13 +14,27 @@ from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from flask import jsonify
+from fastapi_login import LoginManager
+from fastapi_login.exceptions import InvalidCredentialsException
+from pydantic_settings import BaseSettings
+
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+
+TOKEN_URL = "/users/token"
+manager = LoginManager(SECRET_KEY, TOKEN_URL)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router = APIRouter()
+
+@manager.user_loader()
+def get_user(email: str):
+    user = PostgresAccess().get_user_by_email(email)
+
+    return  user
 
 
 def get_db_access():
@@ -50,12 +64,14 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+class Settings(BaseSettings):
+    secret: str = ""  # automatically taken from environment variable
 
 @router.post("/token", response_model=Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db=Depends(get_db_access)):
+def login_for_access_token(data:UserLogin):
 
-    user = PostgresAccess().authenticate_user(form_data.username,form_data.password)
-    print(user)
+    user = PostgresAccess().authenticate_user(data.email,data.password)
+    print('tocken ',user)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,10 +79,16 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),db=D
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user['email']}, expires_delta=access_token_expires
+     
+    access_token = manager.create_access_token(
+        data={"sub": user['email']}
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {'access_token': access_token, 'token_type': 'bearer'}
+
+    # access_token = create_access_token(
+    #     data={"sub": user['email']}, expires_delta=access_token_expires
+    # )
+    # return {"access_token": access_token, "token_type": "bearer"}
 
 
 
@@ -100,6 +122,7 @@ reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", scheme_name="JWT")
     
 #     return SystemUser(**user)
 async def get_current_user(token: str = Depends(reuseable_oauth), db=Depends(get_db_access)) -> SystemUser:
+    print('getuser')
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         token_data = TokenPayload(**payload)
@@ -116,27 +139,26 @@ async def get_current_user(token: str = Depends(reuseable_oauth), db=Depends(get
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    print("ici 2")
+    print("get_current_user")
 
     # Utilisation de la méthode get_user_by_username pour récupérer l'utilisateur
-    print("ici 3")
-    user: Union[dict[str, Any], None] = PostgresAccess().get_user_by_email(token_data.sub)
-    print("ici 4")
+    user = PostgresAccess().get_user_by_email(token_data.sub)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Could not find user",
         )
-    print("ici 5")
-    user = {key: value for key, value in user.items() if key != '_id'}
+    
     # user = SystemUser(**user)
-    print("ici 6",user)
     return user
 
-
-@router.get("/protected_route",response_model=UserDisplay)
-async def protected_route(current_user: SystemUser = Depends(get_current_user)):
-    return current_user
+@router.post("/protected_route")
+async def protected_route(user=Depends(manager)):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Non autorisé")
+    print("protectedroute")
+    print('bonjour', user)
+    return user
 
 
 # fin test #######################################################################
@@ -203,8 +225,8 @@ async def read_user_by_id(user_id: Userid):
     Raises:
         HTTPException: Si aucun utilisateur n'est trouvé avec l'ID fourni.
     """
-    print('ids',user_id)
-    print('wat')
+    print('read_user_by_id ',user_id)
+
     user = PostgresAccess().get_user_by_id(user_id)
     return JSONResponse(content=jsonable_encoder(user))
 
@@ -245,13 +267,13 @@ async def delete_user_by_id(user_id: Userid, db=Depends(get_db_access)):
      Raises:
          HTTPException: Si la suppression échoue ou si aucun utilisateur n'est trouvé avec l'ID fourni.
      """
-    print(user_id.user_id)
+    print('delete_user_by_id',user_id.user_id)
     user = PostgresAccess().delete_user_by_id(user_id)
     return JSONResponse(content=jsonable_encoder(user))
 
 
 @router.post("/login", response_model=UserDisplay)
-async def login_user(data:UserLogin, db=Depends(get_db_access)):
+async def login_user(data:UserLogin):
     """
     Authentifie un utilisateur en vérifiant son nom d'utilisateur et son mot de passe.
 
@@ -266,13 +288,12 @@ async def login_user(data:UserLogin, db=Depends(get_db_access)):
     Raises:
         HTTPException: Si les identifiants ne sont pas valides.
     """
+    print("login")
     
-
-
     try:
         user = PostgresAccess().authenticate_user(data.email, data.password)
         # Si l'authentification réussit, retourner les données de l'utilisateur
-        print("avantsorti",user)
+        print("login",user)
         return JSONResponse(content=jsonable_encoder(user))
     except HTTPException as e:
         # Si une exception HTTP est levée (par exemple, si l'utilisateur n'est pas trouvé ou si le mot de passe est incorrect),

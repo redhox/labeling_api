@@ -5,15 +5,17 @@ from flask import Flask, jsonify, request
 import psycopg2
 import json
 import bcrypt
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 class PostgresAccess:
     def __init__(self):
         # Replace with your connection details
         self.conn = psycopg2.connect(
-            dbname="",
-            user="",
-            password="",
-            host="",
+            dbname=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            host=os.getenv("POSTGRES_HOST"),
         )
         self.cursor = self.conn.cursor()
 
@@ -102,7 +104,6 @@ class PostgresAccess:
             user = self.cursor.fetchone()
             print("listeuser", user[0],user[1],user[2])
             user = {'id': user[0], 'username':user[1] , 'email':user[2]}
-            print("mail1")
             if user:
                 print("mail2: ",user)
                 return user

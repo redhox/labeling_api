@@ -7,11 +7,12 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from app.api.endpoints import users
-# from app.connector.connectorBDD import MongoAccess
+from app.api.endpoints import images
+
+from app.connector.connectorBDD_image import MongoAccess
 
 import os
 from dotenv import load_dotenv
-
 
 # from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 # from jose import JWTError, jwt
@@ -21,7 +22,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
-
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -30,8 +30,8 @@ ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 app = FastAPI()
-# mongo_access = MongoAccess()
-# mongo_access.initialize_db()
+mongo_access = MongoAccess()
+mongo_access.initialize_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -88,6 +88,7 @@ app.add_middleware(
 
 
 app.include_router(users.router, prefix="/users", tags=["users"])
+app.include_router(images.router, prefix="/images", tags=["images"])
 
 @app.get("/")
 async def root():
