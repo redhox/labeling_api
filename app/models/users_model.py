@@ -86,18 +86,8 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
-
-
-
-
-
-
-
-# Modèle pour la création d'un utilisateur, inclut le mot de passe
 class Userid(BaseModel):
     user_id: int
-
-    
 
 
 

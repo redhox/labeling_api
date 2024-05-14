@@ -19,6 +19,9 @@ from fastapi_login import LoginManager
 from fastapi_login.exceptions import InvalidCredentialsException
 from pydantic_settings import BaseSettings
 import json
+from bson import json_util
+from app.detection import image_detection
+from fastapi.responses import Response
 router = APIRouter()
 
 class ImageData(BaseModel):
@@ -28,11 +31,19 @@ class ImageData(BaseModel):
     regions: list
     uuid_machine: str
 
-@router.post("/post_resultat")
-async def post_resultat(data: ImageData): 
+class pathData(BaseModel):
+    path: str 
 
-    print(data)
-    image = MongoAccess().incert_image(data.dict())
+@router.post("/post_resultat") 
+async def post_resultat(data: ImageData): 
+    print('post_resultat') 
+    print(data) 
+    image_data = MongoAccess().phind_path(data.path)
+    print('imagedata',image_data)
+    if image_data ==None:
+        image = MongoAccess().incert_image(data.dict())
+    else: 
+        image = MongoAccess().change_label(image_data['_id'],data.regions)
     print('bonjour')
 
 
@@ -48,13 +59,25 @@ async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...
             buffer.write(contents)  # Écriture du contenu dans le fichier
         manager = MinioBucketManager()  # Create an instance
         manager.upload_file(f'image_temp/{file.filename}', f'raw_image/{path}') 
+        label_image=image_detection(f'image_temp/{file.filename}')
+        print('label image',label_image) 
         os.remove(f'image_temp/{file.filename}')
-        return {"filename": file.filename}  # Retourne le nom du fichier téléchargé
+        return label_image  # Retourne le nom du fichier téléchargé
 
     except Exception as e:
         return {"error": str(e)}  # Gestion des exceptions
+
+
+
+@router.post("/image_search")
+async def image_search(path: str = Form(...)): 
+    print("image_search")
+    print('path=',path)
+
+    image_data = MongoAccess().phind_path(path)
+    print('image data',image_data)
+    if image_data == None:
+        return Response(status_code=404)
     
-    manager = MinioBucketManager()  # Create an instance
-    manager.upload_file('/app/testapi.py', 'dossier/cool/testapi.py') 
-    # image = MinioBucketManager.upload_file('/app/testapi.py', 'testapi.py')
-    print('bonjour') 
+    return  json_util.dumps(image_data)
+

@@ -4,10 +4,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-
-# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 class MongoAccess:
@@ -26,7 +22,7 @@ class MongoAccess:
         return self.db["image_table"]
 
     def initialize_db(self):
-        print('inisialise  bbdd')
+        print('moongodb initilize')
         required_collections = ['image_table'] 
         existing_collections = self.db.list_collection_names()
 
@@ -36,6 +32,8 @@ class MongoAccess:
                 print(f"Collection '{collection_name}' créée.")
             else:
                 print(f"Collection '{collection_name}' existe déjà.")
+        print('moongodb initilize done')
+
 
     def incert_image(self,data):
         return self.db.images.insert_one(data)
@@ -43,12 +41,13 @@ class MongoAccess:
     def change_label(self,image_id,data):
         return self.db.images.update_one(
             {"_id": image_id},  # Critère de sélection du document
-            {"$set": {"label": data}}  # Opération de mise à jour
+            {"$set": {"regions": data}}  # Opération de mise à jour
         )
 
     def phind_user(self,data):
         return self.db.images.find({'user': data})
-
+    def phind_path(self,data):
+        return self.db.images.find_one({'path': data})
     def phind_dir(self,data):
         return self.db.images.find({'dir': data})
 

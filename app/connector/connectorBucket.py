@@ -17,7 +17,7 @@ s3 = boto3.client(
 )
 class MinioBucketManager:
     def __init__(self):
-        self.bucket_name = "image-labelling"
+        self.bucket_name = os.getenv("BUCKET_NAME")
 
     def upload_file(self, file_name, object_name=None):
         """Upload a file to an S3 bucket"""
@@ -32,7 +32,3 @@ class MinioBucketManager:
         for content in response.get('Contents', []):
             print(content['Key'])
 
-# Exemple d'utilisation
-# manager = MinioBucketManager('your-bucket-name')
-# MinioBucketManager.upload_file('app.py', 'app.py')
-# manager.list_objects()
