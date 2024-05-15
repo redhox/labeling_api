@@ -42,68 +42,12 @@ app.add_middleware(
 )
 
 
-
-#test tocken #########################################################################
-# class Token(BaseModel):
-#     access_token: str
-#     token_type: str
-
-# def create_access_token(data: dict):
-#     to_encode = data.copy()
-#     expire = datetime.utcnow() + timedelta(minutes=15)
-#     to_encode.update({"exp": expire})
-#     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-#     return encoded_jwt
-# @app.get("/get_token")
-# async def get_token():
-#     data = {'info': 'informations secrètes', 'from': 'GFG'}
-#     token = create_access_token(data=data)
-#     return {'token': token}
-# @app.post("/verify_token")
-# async def verify_token(token: str):
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         return payload
-#     except JWTError:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invalide")
-
-
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-# @app.post("/token/")
-# def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-#     # Implémentation de la génération de token
-#     print('bonjour')
-# @app.get("/secure/")
-# def secure_endpoint(token: str = Depends(oauth2_scheme)):
-#     print('bonjour')
-
-
-
-
-
-
-#fin test tocken #########################################################################
-
-
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(images.router, prefix="/images", tags=["images"])
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Manag'IA API service"}
-
-# users_db = {
-#     "johndoe": {
-#         "id": 1,
-#         "username": "johndoe",
-#         "full_name": "John Doe",
-#         "email": "johndoe@example.com",
-#         "role": 1,
-#         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-#         "disabled": False,
-#     }
+    return {"message": "api up"}
 
 
 

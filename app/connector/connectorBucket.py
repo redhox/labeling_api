@@ -17,7 +17,7 @@ s3 = boto3.client(
 )
 class MinioBucketManager:
     def __init__(self):
-        self.bucket_name = os.getenv("BUCKET_NAME")
+        self.bucket_name = os.getenv("IMAGE_BUCKET_NAME")
 
     def upload_file(self, file_name, object_name=None):
         """Upload a file to an S3 bucket"""
@@ -32,3 +32,10 @@ class MinioBucketManager:
         for content in response.get('Contents', []):
             print(content['Key'])
 
+class MinioBucketMLflow:
+    def __init__(self):
+        self.bucket_name = os.getenv("MLFLOW_BUCKET_NAME")
+
+    def get_artifact(self):
+        #recuperé les image et model
+        return 'bonjour'
