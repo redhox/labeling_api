@@ -34,10 +34,10 @@ class MongoAccess:
                 print(f"Collection '{collection_name}' existe déjà.")
         print('moongodb initilize done')
 
-
+    # colection image
     def incert_image(self,data):
         return self.db.images.insert_one(data)
-        
+    
     def change_label(self,image_id,data):
         return self.db.images.update_one(
             {"_id": image_id},  # Critère de sélection du document
@@ -53,3 +53,13 @@ class MongoAccess:
 
     def phind_id(self,image_id):
         return self.db.images.find_one({'_id': image_id})
+    
+    # colection model
+    def phind_model_id(self,data):
+        return self.db.models.find_one({'run_id': data})
+    def incert_model(self,data):
+        return self.db.models.insert_one(data)
+    def del_model_id(self,data):
+        return self.db.models.delete_one({'run_id': data})
+    def phind_all_model(self):
+        return self.db.models.find()

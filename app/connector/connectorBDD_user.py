@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 load_dotenv()
 class PostgresAccess:
     def __init__(self):
-        # Replace with your connection details
         self.conn = psycopg2.connect(
             dbname=os.getenv("POSTGRES_DB"),
             user=os.getenv("POSTGRES_USER"),
@@ -16,6 +15,26 @@ class PostgresAccess:
             host=os.getenv("POSTGRES_HOST"),
         )
         self.cursor = self.conn.cursor()
+
+        self.create_table()
+
+    def create_table(self):
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS utilisateur (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL UNIQUE,
+                email VARCHAR(120) NOT NULL UNIQUE,
+                password VARCHAR(128) NOT NULL,
+                is_admin BOOLEAN DEFAULT false
+            );
+        """)
+        self.conn.commit()
+
+
+
+ 
+
+
 
     def get_all_users(self):
         """
@@ -93,10 +112,10 @@ class PostgresAccess:
         """
         try:
             print("mail",user_email)
-            self.cursor.execute(f"SELECT id, username, email FROM utilisateur WHERE email = %s;", (user_email,))
+            self.cursor.execute(f"SELECT id, username, email, is_admin FROM utilisateur WHERE email = %s;", (user_email,))
             user = self.cursor.fetchone()
-            print("listeuser", user[0],user[1],user[2])
-            user = {'id': user[0], 'username':user[1] , 'email':user[2]}
+            print("listeuser", user[0],user[1],user[2],user[3])
+            user = {'id': user[0], 'username':user[1] , 'email':user[2],'is_admin':user[3]}
             if user:
                 print("mail2: ",user)
                 return user

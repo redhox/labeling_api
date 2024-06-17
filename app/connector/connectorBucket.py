@@ -15,22 +15,37 @@ s3 = boto3.client(
     region_name=os.getenv("REGION_NAME"),  # Par exemple, 'us-east-1'
     config=config,
 )
+
 class MinioBucketManager:
     def __init__(self):
         self.bucket_name = os.getenv("IMAGE_BUCKET_NAME")
 
+    def test_connection(self):
+        try:
+            # Test connection by listing objects in the bucket
+            response = s3.list_objects_v2(Bucket=self.bucket_name)
+            print("Connection successful. Objects in the bucket:", len(response['Contents']))
+        except Exception as e:
+            print("Failed to connect to the bucket:", str(e))
+
     def upload_file(self, file_name, object_name=None):
-        """Upload a file to an S3 bucket"""
+        print("Upload a file to an S3 bucket")
         if object_name is None:
             object_name = file_name
         # Upload the file
-        s3.upload_file(file_name, self.bucket_name, object_name)
+        response = s3.upload_file(file_name, self.bucket_name, object_name)
+        print("Upload done")
+        return
 
     def list_objects(self):
         """List all objects in the bucket"""
         response = s3.list_objects(Bucket=self.bucket_name)
         for content in response.get('Contents', []):
             print(content['Key'])
+        return
+manager = MinioBucketManager()
+manager.test_connection()
+
 
 class MinioBucketMLflow:
     def __init__(self):
@@ -39,3 +54,5 @@ class MinioBucketMLflow:
     def get_artifact(self):
         #recuperé les image et model
         return 'bonjour'
+    def dl_model(self,path_bucket,path_local):
+        response = s3.download_file(self.bucket_name, path_bucket, path_local)

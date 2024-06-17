@@ -55,6 +55,7 @@ class SystemUser(BaseModel):
 class TokenPayload(BaseModel):
     sub: str
     exp: int
+
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
     if expires_delta:
@@ -69,7 +70,7 @@ class Settings(BaseSettings):
 
 @router.post("/token", response_model=Token)
 def login_for_access_token(data:UserLogin):
-
+ 
     user = PostgresAccess().authenticate_user(data.email,data.password)
     print('tocken ',user)
     if not user:
@@ -126,7 +127,7 @@ async def get_current_user(token: str = Depends(reuseable_oauth), db=Depends(get
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         token_data = TokenPayload(**payload)
-        
+         
         if datetime.fromtimestamp(token_data.exp) < datetime.now():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -150,7 +151,7 @@ async def get_current_user(token: str = Depends(reuseable_oauth), db=Depends(get
         )
     
     # user = SystemUser(**user)
-    return user
+    return user 
 
 @router.post("/protected_route")
 async def protected_route(user=Depends(manager)):

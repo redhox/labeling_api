@@ -1,3 +1,5 @@
 .venv/
 .env
 .nx/
+models/*
+image_temp/*

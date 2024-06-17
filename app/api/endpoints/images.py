@@ -49,18 +49,26 @@ async def post_resultat(data: ImageData):
 
 
 @router.post("/image_save")
-async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...)):   
+async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...),model: str = Form(...)):   
     try:
         contents = await file.read() # Lecture ducontenu du fichier
-        print('path: ',path )
-        print('plus',file.filename)
-
+        print('image_save ',file.filename)
+        if not os.path.exists('image_temp'):
+            os.makedirs('image_temp')
         with open(f'image_temp/{file.filename}', 'wb') as buffer:  # Ouverture du fichier en mode écriture binaire
             buffer.write(contents)  # Écriture du contenu dans le fichier
+        print('image_save ping1')
+
         manager = MinioBucketManager()  # Create an instance
-        manager.upload_file(f'image_temp/{file.filename}', f'raw_image/{path}') 
-        label_image=image_detection(f'image_temp/{file.filename}')
-        print('label image',label_image) 
+        manager.upload_file(f'image_temp/{file.filename}', f'raw_image/{path}')
+        print('image_save ping2')
+        label_image=image_detection(f'image_temp/{file.filename}',model)
+
+        # try:
+        #     label_image=image_detection(f'image_temp/{file.filename}',model)
+        # except:
+        #     label_image={'regions': []}
+        print('label image',label_image)
         os.remove(f'image_temp/{file.filename}')
         return label_image  # Retourne le nom du fichier téléchargé
 
@@ -68,16 +76,14 @@ async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...
         return {"error": str(e)}  # Gestion des exceptions
 
 
-
 @router.post("/image_search")
 async def image_search(path: str = Form(...)): 
-    print("image_search")
-    print('path=',path)
+    print("image_search") 
+    print('path=',path) 
 
     image_data = MongoAccess().phind_path(path)
-    print('image data',image_data)
+    print('image data',image_data) 
     if image_data == None:
         return Response(status_code=404)
-    
     return  json_util.dumps(image_data)
-
+ 

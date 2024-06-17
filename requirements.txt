@@ -24,3 +24,4 @@ python-multipart
 fastapi_login
 boto3
 ultralytics
+mlflow

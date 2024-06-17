@@ -8,8 +8,10 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 from app.api.endpoints import users
 from app.api.endpoints import images
+from app.api.endpoints import models
 
 from app.connector.connectorBDD_image import MongoAccess
+from app.connector.connectorBucket import MinioBucketManager
 
 import os
 from dotenv import load_dotenv
@@ -33,6 +35,8 @@ app = FastAPI()
 mongo_access = MongoAccess()
 mongo_access.initialize_db()
 
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Permet à toutes les origines
@@ -44,6 +48,7 @@ app.add_middleware(
 
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(images.router, prefix="/images", tags=["images"])
+app.include_router(models.router, prefix="/models", tags=["models"])
 
 @app.get("/")
 async def root():
