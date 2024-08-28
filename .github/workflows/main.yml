@@ -18,7 +18,7 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          if [ ! -d "app" ]; then
+          if [ ! -d "app_api" ]; then
             mkdir app_api
             cd app_api
             git clone https://github.com/redhox/labeling_api.git .
