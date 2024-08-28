@@ -43,7 +43,7 @@ jobs:
             -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
             -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} \
             -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
-            -e MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }} \ 
+            -e MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }} \
             -e MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }} \
             -e MONGO_DB=${{ secrets.MONGO_DB }} \
             -e MONGO_HOST=${{ secrets.MONGO_HOST }} \
