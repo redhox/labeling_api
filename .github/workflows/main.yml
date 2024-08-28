@@ -1,0 +1,55 @@
+name: mlflow application
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          sudo apt update && sudo apt-get install -y docker.io docker-compose
+          sudo systemctl restart docker.service
+          if [ ! -d "app" ]; then
+            mkdir app
+            cd app
+            git clone https://github.com/redhox/labeling_api.git .
+          else
+            cd app
+            git pull origin main
+          fi
+          sudo docker build -t api -f ./Dockerfile .
+          sudo docker run -d \
+            -p 5000:5000 \
+            -e ENDPOINT_URL=${{ secrets.ENDPOINT_URL }} \ #bucket 
+            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \ 
+            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            -e REGION_NAME="us-east-1" \
+            -e SIGNATURE_VERSION="s3v4" \
+            -e BUCKET_NAME=${{ secrets.BUCKET_NAME }} \
+            -e MLFLOW_URL=${{ secrets.MLFLOW_URL }} \ #mlflow
+            -e MLFLOW_USER=${{ secrets.MLFLOW_USER }} \
+            -e MLFLOW_PASSWORD=${{ secrets.MLFLOW_PASSWORD }} \
+            -e MLFLOW_BUCKET_NAME=${{ secrets.MLFLOW_BUCKET_NAME }} \
+            -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \ #postesql
+            -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            -e POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} \
+            -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
+            -e MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }} \ mongodb
+            -e MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }} \
+            -e MONGO_DB=${{ secrets.MONGO_DB }} \
+            -e MONGO_HOST=${{ secrets.MONGO_HOST }} \
+            -e MONGO_PORT=27017 \
+            -e ALGORITHM="HS256" \
+            -e ACCESS_TOKEN_EXPIRE_MINUTES=300 \
+            --name api
