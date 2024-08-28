@@ -48,6 +48,6 @@ jobs:
             -e MONGO_DB=${{ secrets.MONGO_DB }} \
             -e MONGO_HOST=${{ secrets.MONGO_HOST }} \
             -e MONGO_PORT=27017 \
-            -e ALGORITHM="HS256" \
+            -e ALGORITHM=HS256 \
             -e ACCESS_TOKEN_EXPIRE_MINUTES=300 \
             --name api
