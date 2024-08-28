@@ -30,7 +30,7 @@ jobs:
           fi
           sudo docker build -t api -f ./Dockerfile .
           sudo docker run -d \
-            -p 5000:5000 \
+            -p 8002:8002 \
             -e ENDPOINT_URL=${{ secrets.ENDPOINT_URL }} \ #bucket 
             -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \ 
             -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
