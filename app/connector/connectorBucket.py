@@ -18,7 +18,7 @@ s3 = boto3.client(
 
 class MinioBucketManager:
     def __init__(self):
-        self.bucket_name = os.getenv("IMAGE_BUCKET_NAME")
+        self.bucket_name = os.getenv("BUCKET_NAME")
 
     def test_connection(self):
         try:
