@@ -50,4 +50,4 @@ jobs:
             -e MONGO_PORT=27017 \
             -e ALGORITHM=HS256 \
             -e ACCESS_TOKEN_EXPIRE_MINUTES=300 \
-            --name api
+            --name api:latest
