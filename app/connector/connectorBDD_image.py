@@ -13,7 +13,7 @@ class MongoAccess:
         pw = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
         db_name = os.getenv("MONGO_DB")
         host =os.getenv("MONGO_HOST")
-        self.client = MongoClient(f"mongodb://{user}:{pw}@{host}")
+        self.client = MongoClient(f"mongodb://{user}:{pw}@{host}:2717")
         self.db = self.client[db_name]
 
 
