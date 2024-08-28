@@ -18,14 +18,12 @@ jobs:
         username: ${{ secrets.VPS_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          sudo apt update && sudo apt-get install -y docker.io docker-compose
-          sudo systemctl restart docker.service
           if [ ! -d "app" ]; then
-            mkdir app
-            cd app
+            mkdir app_api
+            cd app_api
             git clone https://github.com/redhox/labeling_api.git .
           else
-            cd app
+            cd app_api
             git pull origin main
           fi
           sudo docker build -t api -f ./Dockerfile .
