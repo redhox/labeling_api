@@ -24,7 +24,7 @@ jobs:
             git clone https://github.com/redhox/labeling_api.git .
           else
             cd app_api
-            docker stop api
+            docker stop app_api
             git pull origin main
           fi
           docker build -t app_api -f ./Dockerfile .
