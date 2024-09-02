@@ -1,7 +1,7 @@
 # Dockerfile pour l'API FastAPI
 FROM python:3.10
 RUN apt-get update && apt-get install -y libsm6 libxext6 libxrender-dev
-RUN apt update && apt install -y python3-opencv
+RUN apt-get install -y python3-opencv
 # Répertoire de travail
 WORKDIR /app
 
