@@ -33,6 +33,10 @@ class ImageData(BaseModel):
 
 class pathData(BaseModel):
     path: str 
+class image_label(BaseModel):
+    uuid: str 
+    projet_name: str   
+    download: bool
 
 @router.post("/post_resultat") 
 async def post_resultat(data: ImageData): 
@@ -86,4 +90,15 @@ async def image_search(path: str = Form(...)):
     if image_data == None:
         return Response(status_code=404)
     return  json_util.dumps(image_data)
+
  
+@router.post("/labels")
+async def image_labels(image_label): 
+    path=f"{image_label.uuid}/{image_label.projet_name}"
+    data = MongoAccess().phind_dir(path) 
+    if image_label.download == False:
+        if data is not None:
+            data=True
+    print("data label dl=",data)
+        
+    return data
