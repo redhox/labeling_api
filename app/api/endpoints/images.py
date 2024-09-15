@@ -33,7 +33,7 @@ class ImageData(BaseModel):
 
 class pathData(BaseModel):
     path: str 
-class image_label(BaseModel):
+class Image_label(BaseModel):
     uuid: str 
     projet_name: str   
     download: bool
@@ -82,8 +82,8 @@ async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...
 
 @router.post("/image_search")
 async def image_search(path: str = Form(...)): 
-    print("image_search") 
-    print('path=',path) 
+    print("image_search")
+    print('path=',path)
 
     image_data = MongoAccess().phind_path(path)
     print('image data',image_data) 
@@ -93,12 +93,14 @@ async def image_search(path: str = Form(...)):
 
  
 @router.post("/labels")
-async def image_labels(image_label): 
-    path=f"{image_label.uuid}/{image_label.projet_name}"
-    data = MongoAccess().phind_dir(path) 
-    if image_label.download == False:
-        if data is not None:
-            data=True
-    print("data label dl=",data)
+async def image_labels(data: Image_label): 
+    data_label = MongoAccess().phind_dir_uuid(data.projet_name,data.uuid) 
+    if data.download == False:
+        print(data_label)
+        if data_label == []:
+            data_label={"message":False}
+        else :
+            data_label={"message":True}
+    print("data label dl=",data_label)
         
-    return data
+    return  json_util.dumps(data_label)

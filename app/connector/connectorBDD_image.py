@@ -51,6 +51,13 @@ class MongoAccess:
     def phind_dir(self,data):
         return self.db.images.find({'dir': data})
 
+    def phind_dir(self,data):
+        return self.db.images.find({'dir': data})
+
+    def phind_dir_uuid(self,data,uuid_machine):
+        return list(self.db.images.find({'filedir': data, "uuid_machine": uuid_machine}))        
+        
+
     def phind_id(self,image_id):
         return self.db.images.find_one({'_id': image_id})
     
