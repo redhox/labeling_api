@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException,status
 # from app.crud.users_crud import UserCRUD
-from app.models.users_model import UserCreate, UserDisplay , Usermail,Userid,UserLogin
+from app.models.users_model import  UserDisplay , Usermail,Userid,UserLogin
 from bson import ObjectId
 from app.connector.connectorBDD_user import PostgresAccess
 from typing import List
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import os
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel ,EmailStr
 from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -161,8 +161,13 @@ async def protected_route(user=Depends(manager)):
     print('bonjour', user)
     return user
 
-
+ 
 # fin test #######################################################################
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
 @router.post("/", response_model=UserDisplay, status_code=201)
 async def create_user(user_data: UserCreate, db=Depends(get_db_access)):
     """
@@ -175,6 +180,7 @@ async def create_user(user_data: UserCreate, db=Depends(get_db_access)):
     Returns:
         UserDisplay: Les données de l'utilisateur créé, formatées selon le modèle UserDisplay.
     """
+    print('create_user') 
     username = user_data.username
     email = user_data.email
     password = user_data.password
@@ -232,6 +238,16 @@ async def read_user_by_id(user_id: Userid):
     return JSONResponse(content=jsonable_encoder(user))
 
 
+@router.post("/get_all_users", response_model=List[UserDisplay])
+async def get_all_users():
+
+    print('get_all_users ')
+
+    user = PostgresAccess().get_all_users()
+    return JSONResponse(content=jsonable_encoder(user))
+
+
+
 @router.post("/email", response_model=UserDisplay,status_code=201)
 async def read_user_by_email(user_email: Usermail, db=Depends(get_db_access)):
     """
@@ -253,7 +269,7 @@ async def read_user_by_email(user_email: Usermail, db=Depends(get_db_access)):
     return JSONResponse(content=jsonable_encoder(user))
 
 
-@router.delete("/delete")
+@router.post("/delete")
 async def delete_user_by_id(user_id: Userid, db=Depends(get_db_access)):
     """
      Supprime un utilisateur spécifique par son ID.
@@ -269,9 +285,32 @@ async def delete_user_by_id(user_id: Userid, db=Depends(get_db_access)):
          HTTPException: Si la suppression échoue ou si aucun utilisateur n'est trouvé avec l'ID fourni.
      """
     print('delete_user_by_id',user_id.user_id)
-    user = PostgresAccess().delete_user_by_id(user_id)
+    user = PostgresAccess().delete_user_by_id(user_id.user_id)
     return JSONResponse(content=jsonable_encoder(user))
 
+class SwitchRoleRequest(BaseModel):
+    user_id: int
+    role_is_admin: bool
+
+@router.post("/switch_role")
+async def switch_role(request: SwitchRoleRequest,db=Depends(get_db_access)):
+    """
+     Supprime un utilisateur spécifique par son ID.
+
+     Args:
+         user_id (str): ID de l'utilisateur à supprimer. 
+         db: Instance de la connexion à la base de données, obtenue par dépendance.
+
+     Returns:
+         bool: True si la suppression a réussi, False sinon.
+
+     Raises:
+         HTTPException: Si la suppression échoue ou si aucun utilisateur n'est trouvé avec l'ID fourni.
+     """
+    user_id = request.user_id
+    role = request.role_is_admin
+    user = PostgresAccess().switch_role_by_id(user_id,role)
+    return JSONResponse(content=jsonable_encoder(user))
 
 @router.post("/login", response_model=UserDisplay)
 async def login_user(data:UserLogin):

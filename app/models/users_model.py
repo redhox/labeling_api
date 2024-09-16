@@ -58,7 +58,8 @@ class UserCreate(UserBase):
     """
     Modèle pour la création d'un utilisateur. Inclut un champ pour le mot de passe.
     """
-
+    username: str
+    mail: str
     password: str
 
     @validator('password')

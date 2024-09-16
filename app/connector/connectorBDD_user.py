@@ -43,7 +43,7 @@ class PostgresAccess:
         Returns:
             list: A list of dictionaries containing user data.
         """
-        self.cursor.execute("SELECT id, username, email FROM utilisateur;")
+        self.cursor.execute("SELECT id, username, email , is_admin FROM utilisateur;")
         users = self.cursor.fetchall()
         return users
 
@@ -88,8 +88,8 @@ class PostgresAccess:
         """
         try:
             user_id=user.user_id
-            print(f"SELECT id , email, username  FROM utilisateur WHERE id = {user_id};")
-            self.cursor.execute("SELECT id , email, username  FROM utilisateur WHERE id = %s;", (user_id,))
+            print(f"SELECT id , email, username , is_admin FROM utilisateur WHERE id = {user_id};")
+            self.cursor.execute("SELECT id , email, username ,is_admin FROM utilisateur WHERE id = %s;", (user_id,))
             user = self.cursor.fetchone()
             if user:
                 return user
@@ -127,7 +127,7 @@ class PostgresAccess:
             return {"error": f"Erreur lors de la récupération de l'utilisateur: {str(e)}"}
 
 
-    def delete_user_by_id(self, user):
+    def delete_user_by_id(self, user_id):
         """
         Delete a user by their ID from the database.
 
@@ -138,19 +138,46 @@ class PostgresAccess:
             dict: A dictionary containing the user data or an error message.
         """
         try:
-            user_id=user.user_id
-            self.cursor.execute("GRANT DELETE ON TABLE utilisateur TO jean;")
-            user = self.cursor.fetchone()
-            print(user)
+            
+
+            
             print(f"DELETE FROM utilisateur WHERE id = {user_id};")
 
             self.cursor.execute("DELETE FROM utilisateur WHERE id = %s;", (user_id,))
-            
-            if user:
-                return {"error": "Utilisateur delete."}
-            else:
-                return {"error": "Utilisateur introuvable."}
+            self.conn.commit()
+            # if user:
+            #     return {"error": "Utilisateur delete."}
+            # else:
+            #     return {"error": "Utilisateur introuvable."}
         except Exception as e:
+            return {"error": f"Erreur lors de la récupération de l'utilisateur: {str(e)}"}
+
+    def switch_role_by_id(self, user,role_is_admin):
+        print('switch_role_by_id')
+        """
+        Delete a user by their ID from the database.
+
+        Args:
+            user_id (int): The ID of the user to retrieve.
+
+        Returns:
+            dict: A dictionary containing the user data or an error message.
+        """
+        try:
+            
+
+        
+            print(f'UPDATE "utilisateur" SET "is_admin"= {role_is_admin} WHERE "id"={user};')
+            self.cursor.execute("UPDATE utilisateur SET is_admin = %s WHERE id = %s;",(role_is_admin,user,))
+            self.conn.commit()
+
+            return 
+
+
+
+
+        except Exception as e: 
+            print("po marchjer")
             return {"error": f"Erreur lors de la récupération de l'utilisateur: {str(e)}"}
 
 
