@@ -86,7 +86,9 @@ class UserLogin(BaseModel):
     """
     email: str
     password: str
-
+    uuid_machine: str
+    ip_address: str
+    user_agent: str
 class Userid(BaseModel):
     user_id: int
 

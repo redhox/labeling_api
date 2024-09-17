@@ -15,10 +15,19 @@ class PostgresAccess:
             host=os.getenv("POSTGRES_HOST"),
         )
         self.cursor = self.conn.cursor()
+        try:
+            self.create_user_table()
+            print('up create_user_table')
+        except:
+            print('error create_user_table')
+        try:
+            self.create_login_table()
+            print('up create_login_table')
 
-        self.create_table()
+        except:           
+            print('error create_login_table')
 
-    def create_table(self):
+    def create_user_table(self):
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS utilisateur (
                 id SERIAL PRIMARY KEY,
@@ -26,6 +35,19 @@ class PostgresAccess:
                 email VARCHAR(120) NOT NULL UNIQUE,
                 password VARCHAR(128) NOT NULL,
                 is_admin BOOLEAN DEFAULT false
+            );
+        """)
+        self.conn.commit()
+
+    def create_login_table(self):
+        self.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS login (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES utilisateur(id) ON DELETE CASCADE,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ip_address VARCHAR(45),
+                machine VARCHAR(45),
+                user_agent TEXT  
             );
         """)
         self.conn.commit()
@@ -225,3 +247,32 @@ class PostgresAccess:
         hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         # Convertir le hash en string pour le stockage en base de données
         return hashed.decode('utf-8')
+    
+
+    def login(self,user_id, ip_address, user_agent,uuid_machine):
+        """
+        Vérifie si un utilisateur existe avec le mail d'utilisateur et le mot de passe fournis.
+
+        Args:
+            email (str): Le mail d'utilisateur de l'utilisateur.
+            password (str): Le mot de passe de l'utilisateur.
+
+        Returns:
+            dict: Les données de l'utilisateur si les identifiants sont valides.
+
+        Raises:
+            HTTPException: Si les identifiants ne sont pas valides.
+        """
+        print('ici ça login')
+        self.cursor.execute(f"INSERT INTO login (user_id, ip_address, user_agent,machine) VALUES (%s, %s, %s, %s)",(user_id, ip_address, user_agent,uuid_machine))
+        self.conn.commit()
+        return 
+
+    def get_last_login(self, user_id):
+        self.cursor.execute("""
+            SELECT * FROM login
+            WHERE user_id = %s
+            ORDER BY login_time DESC
+            LIMIT 1;
+        """, (user_id,))
+        return self.cursor.fetchone() 

@@ -49,6 +49,7 @@ def get_db_access():
 class Token(BaseModel):
     access_token: str
     token_type: str
+    last_login:dict
 class SystemUser(BaseModel):
     username: str
     email: str
@@ -69,7 +70,7 @@ class Settings(BaseSettings):
     secret: str = ""  # automatically taken from environment variable
 
 @router.post("/token", response_model=Token)
-def login_for_access_token(data:UserLogin):
+def login_for_access_token(data:UserLogin): 
  
     user = PostgresAccess().authenticate_user(data.email,data.password)
     print('tocken ',user)
@@ -79,12 +80,27 @@ def login_for_access_token(data:UserLogin):
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    last_login_db=PostgresAccess().get_last_login(user['id'])
+    last_login= {}
+    if last_login_db == None:
+        last_login['message'] ='first conection'
+    else:
+        last_login['message'] =last_login_db[2]
+        last_login['ip'] =last_login_db[3]
+        last_login['uuid']=last_login_db[4]
+        last_login['navigateur']=last_login_db[5]
+    print('lastlogin',last_login)
+    PostgresAccess().login(user['id'], data.ip_address, data.user_agent,data.uuid_machine)
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES) 
      
     access_token = manager.create_access_token(
         data={"sub": user['email']}
     )
-    return {'access_token': access_token, 'token_type': 'bearer'}
+    reponse = {'access_token': access_token, 'token_type': 'bearer','last_login':last_login}
+    print('reponce',reponse)
+    return reponse
 
     # access_token = create_access_token(
     #     data={"sub": user['email']}, expires_delta=access_token_expires
