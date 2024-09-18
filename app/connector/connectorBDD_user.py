@@ -23,9 +23,13 @@ class PostgresAccess:
         try:
             self.create_login_table()
             print('up create_login_table')
-
         except:           
             print('error create_login_table')
+        try:
+            self.create_first_user()
+            print('up create_first_user')
+        except:
+            print('error create_first_user')
 
     def create_user_table(self):
         self.cursor.execute("""
@@ -52,10 +56,25 @@ class PostgresAccess:
         """)
         self.conn.commit()
 
+    def create_first_user(self):
+        is_user=self.get_all_users()
+        if is_user == []:
+            username ="admin"
+            email = "admin@example.com"
+            password = "admin"
+            password = self.hash_password(password)
+            self.cursor.execute(
+                """
+                INSERT INTO utilisateur (username, email, password ,is_admin)
+                VALUES (%s, %s, %s,%s);
+                """, 
+                (username, email, password,True),
+            )
+            self.conn.commit()
+ 
 
 
  
-
 
 
     def get_all_users(self):
@@ -276,3 +295,4 @@ class PostgresAccess:
             LIMIT 1;
         """, (user_id,))
         return self.cursor.fetchone() 
+    
