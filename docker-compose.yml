@@ -10,6 +10,26 @@ services:
     volumes:
       - './:/app/'
 
+  prometheus:
+    image: docker.io/prom/prometheus:v2.54.1
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command: "--config.file=/etc/prometheus/prometheus.yaml"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yaml
+      # - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: docker.io/grafana/grafana-oss:11.2.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
 networks:
     managia-network:
       driver: bridge
@@ -21,4 +41,5 @@ volumes:
     mongodb-log:
     mongodb-etc:
     fastapi:
-
+    grafana-data:
+      driver: local
