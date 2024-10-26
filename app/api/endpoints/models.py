@@ -5,7 +5,7 @@ from bson import ObjectId
 from app.connector.connectorBucket import MinioBucketMLflow
 from app.connector.connectorMLflow import MlflowConnect
 from app.connector.connectorBDD_image import MongoAccess
-
+from app.api.endpoints.users import get_current_user,SystemUser
 from typing import List
 import bcrypt
 from datetime import datetime, timedelta
@@ -48,7 +48,7 @@ def download_model():
 
 
 @router.post("/lists_models") 
-async def lists_models(): 
+async def lists_models(current_user: SystemUser = Depends(get_current_user)): 
     print('all_model') 
     list_model = MlflowConnect.liste_mlflow()
     return json_util.dumps(list_model)
@@ -59,8 +59,8 @@ class Modelid(BaseModel):
 
 
 
-@router.post("/add_model_id") 
-async def lists_models(model_id: Modelid):
+@router.put("/add_model_id") 
+async def lists_models(model_id: Modelid,current_user: SystemUser = Depends(get_current_user)):
     print('add_model',model_id) 
     model_id=model_id.id
     model_data = MlflowConnect.run_by_id(model_id)
@@ -73,8 +73,8 @@ async def lists_models(model_id: Modelid):
     download_model()
     return {'message':'model added'}
 
-@router.post("/del_model_id") 
-async def del_model(model_id: Modelid):
+@router.delete("/del_model_id") 
+async def del_model(model_id: Modelid,current_user: SystemUser = Depends(get_current_user)):
     print('del_model') 
     model_id=model_id.id
     model = MongoAccess().del_model_id(model_id)
@@ -83,7 +83,7 @@ async def del_model(model_id: Modelid):
     return {'message':'model added'}
  
 @router.post("/actif_model")
-async def actif_model():
+async def actif_model(current_user: SystemUser = Depends(get_current_user)):
     print('actif_model') 
     model_data = MongoAccess().phind_all_model()
     return json_util.dumps(model_data)

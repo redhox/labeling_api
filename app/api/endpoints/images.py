@@ -38,7 +38,7 @@ class Image_label(BaseModel):
     projet_name: str   
     download: bool
 
-@router.post("/post_resultat") 
+@router.put("/post_resultat") 
 async def post_resultat(data: ImageData): 
     print('post_resultat') 
     print(data) 

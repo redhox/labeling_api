@@ -179,13 +179,13 @@ async def protected_route(user=Depends(manager)):
 
  
 # fin test #######################################################################
-
+ 
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str
 @router.post("/", response_model=UserDisplay, status_code=201)
-async def create_user(user_data: UserCreate, db=Depends(get_db_access)):
+async def create_user(user_data: UserCreate, db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)):
     """
     Crée un nouvel utilisateur dans la base de données.
 
@@ -209,7 +209,7 @@ async def create_user(user_data: UserCreate, db=Depends(get_db_access)):
 
 
 @router.get("/", response_model=List[UserDisplay])
-async def read_all_users(db=Depends(get_db_access)):
+async def read_all_users(db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)): 
     """
     Récupère une liste de tous les utilisateurs enregistrés dans la base de données.
 
@@ -234,7 +234,7 @@ async def read_all_users(db=Depends(get_db_access)):
 
 
 @router.post("/ids")
-async def read_user_by_id(user_id: Userid):
+async def read_user_by_id(user_id: Userid,current_user: SystemUser = Depends(get_current_user)):
     """
     Récupère les données d'un utilisateur spécifique par son ID.
 
@@ -255,7 +255,7 @@ async def read_user_by_id(user_id: Userid):
 
 
 @router.post("/get_all_users", response_model=List[UserDisplay])
-async def get_all_users():
+async def get_all_users(current_user: SystemUser = Depends(get_current_user)):
 
     print('get_all_users ')
 
@@ -265,7 +265,7 @@ async def get_all_users():
 
 
 @router.post("/email", response_model=UserDisplay,status_code=201)
-async def read_user_by_email(user_email: Usermail, db=Depends(get_db_access)):
+async def read_user_by_email(user_email: Usermail, db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)):
     """
     Récupère les données d'un utilisateur spécifique par son adresse email.
 
@@ -285,8 +285,8 @@ async def read_user_by_email(user_email: Usermail, db=Depends(get_db_access)):
     return JSONResponse(content=jsonable_encoder(user))
 
 
-@router.post("/delete")
-async def delete_user_by_id(user_id: Userid, db=Depends(get_db_access)):
+@router.delete("/delete")
+async def delete_user_by_id(user_id: Userid, db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)):
     """
      Supprime un utilisateur spécifique par son ID.
 
@@ -308,8 +308,8 @@ class SwitchRoleRequest(BaseModel):
     user_id: int
     role_is_admin: bool
 
-@router.post("/switch_role")
-async def switch_role(request: SwitchRoleRequest,db=Depends(get_db_access)):
+@router.put("/switch_role")
+async def switch_role(request: SwitchRoleRequest,db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)):
     """
      Supprime un utilisateur spécifique par son ID.
 
