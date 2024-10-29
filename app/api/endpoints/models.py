@@ -10,7 +10,8 @@ from typing import List
 import bcrypt
 from datetime import datetime, timedelta
 import os
-from jose import JWTError, jwt
+# from jose import JWTError, jwt
+import jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from pydantic import ValidationError

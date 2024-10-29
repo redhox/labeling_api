@@ -18,7 +18,8 @@ sniffio~=1.3.0
 idna~=3.6.0
 email-validator
 flask
-psycopg2
+psycopg2-binary
+#psycopg2
 bcrypt
 python-multipart
 fastapi_login
@@ -27,3 +28,7 @@ ultralytics
 mlflow
 prometheus_client
 prometheus-fastapi-instrumentator
+PyJWT
+pytest 
+pytest-asyncio
+httpx 

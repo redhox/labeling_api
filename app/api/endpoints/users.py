@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException,status
 # from app.crud.users_crud import UserCRUD
-from app.models.users_model import  UserDisplay , Usermail,Userid,UserLogin
+from app.models.users_model import *
 from bson import ObjectId
 from app.connector.connectorBDD_user import PostgresAccess
 from typing import List
 import bcrypt
 from datetime import datetime, timedelta
 import os
-from jose import JWTError, jwt
+#from jose import JWTError, jwt
+from app.api.def_util.def_user import *
+import jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel ,EmailStr
 from pydantic import ValidationError
@@ -18,56 +20,15 @@ from fastapi_login import LoginManager
 from fastapi_login.exceptions import InvalidCredentialsException
 from pydantic_settings import BaseSettings
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
-TOKEN_URL = "/users/token"
-manager = LoginManager(SECRET_KEY, TOKEN_URL)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 router = APIRouter()
 
-@manager.user_loader()
-def get_user(email: str):
-    user = PostgresAccess().get_user_by_email(email)
-
-    return  user
 
 
-def get_db_access():
-    """
-    Fournit un accès à la base de données via la classe MongoAccess.
-    Cela permet une séparation claire entre la couche d'accès aux données et la logique de l'application.
 
-    Returns:
-        Instance de MongoAccess qui offre une connexion aux collections MongoDB spécifiques.
-    """
-    return PostgresAccess()
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-    last_login:dict
-class SystemUser(BaseModel):
-    username: str
-    email: str
-class TokenPayload(BaseModel):
-    sub: str
-    exp: int
-
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-class Settings(BaseSettings):
-    secret: str = ""  # automatically taken from environment variable
 
 @router.post("/token", response_model=Token)
 def login_for_access_token(data:UserLogin): 
@@ -109,7 +70,6 @@ def login_for_access_token(data:UserLogin):
 
 
 
-reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", scheme_name="JWT")
 
 # async def get_current_user(token: str = Depends(reuseable_oauth)) -> SystemUser:
 #     try:
@@ -138,36 +98,6 @@ reuseable_oauth = OAuth2PasswordBearer(tokenUrl="/login", scheme_name="JWT")
 #         )
     
 #     return SystemUser(**user)
-async def get_current_user(token: str = Depends(reuseable_oauth), db=Depends(get_db_access)) -> SystemUser:
-    print('getuser')
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        token_data = TokenPayload(**payload)
-         
-        if datetime.fromtimestamp(token_data.exp) < datetime.now():
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token expired",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    except (jwt.JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    print("get_current_user")
-
-    # Utilisation de la méthode get_user_by_username pour récupérer l'utilisateur
-    user = PostgresAccess().get_user_by_email(token_data.sub)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Could not find user",
-        )
-    
-    # user = SystemUser(**user)
-    return user 
 
 @router.post("/protected_route")
 async def protected_route(user=Depends(manager)):
@@ -180,10 +110,6 @@ async def protected_route(user=Depends(manager)):
  
 # fin test #######################################################################
  
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
 @router.post("/", response_model=UserDisplay, status_code=201)
 async def create_user(user_data: UserCreate, db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)):
     """
@@ -304,9 +230,7 @@ async def delete_user_by_id(user_id: Userid, db=Depends(get_db_access),current_u
     user = PostgresAccess().delete_user_by_id(user_id.user_id)
     return JSONResponse(content=jsonable_encoder(user))
 
-class SwitchRoleRequest(BaseModel):
-    user_id: int
-    role_is_admin: bool
+
 
 @router.put("/switch_role")
 async def switch_role(request: SwitchRoleRequest,db=Depends(get_db_access),current_user: SystemUser = Depends(get_current_user)):

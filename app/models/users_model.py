@@ -2,6 +2,10 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, validator, ValidationError
 from typing import Optional
 import re
+from pydantic_settings import BaseSettings
+from pydantic import BaseModel ,EmailStr
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
 
 
 # Modèle de base pour l'utilisateur
@@ -95,6 +99,30 @@ class Userid(BaseModel):
 
 
 
+
+
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    last_login:dict
+class SystemUser(BaseModel):
+    username: str
+    email: str
+class TokenPayload(BaseModel):
+    sub: str
+    exp: int
+class Settings(BaseSettings):
+    secret: str = ""  # automatically taken from environment variable
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+class SwitchRoleRequest(BaseModel):
+    user_id: int
+    role_is_admin: bool
 
 
 
