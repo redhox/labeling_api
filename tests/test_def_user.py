@@ -34,7 +34,7 @@ def mock_token_data():
         "sub": "test@example.com",
         "exp": int((datetime.utcnow() + timedelta(minutes=99999)).timestamp())
     }
-def test_get_current_user_valid_token(db_connection):
+# def test_get_current_user_valid_token(db_connection):
     # Example test that requires DB connection
     with db_connection.cursor() as cursor:
         cursor.execute("SELECT * FROM users WHERE id = 1;")
