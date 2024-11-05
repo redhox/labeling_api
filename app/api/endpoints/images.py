@@ -8,7 +8,8 @@ from typing import List
 import bcrypt
 from datetime import datetime, timedelta
 import os
-from jose import JWTError, jwt
+#from jose import JWTError, jwt
+import jwt
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -22,6 +23,7 @@ import json
 from bson import json_util
 from app.detection import image_detection
 from fastapi.responses import Response
+from app.api.endpoints.users import get_current_user,SystemUser
 router = APIRouter()
 
 class ImageData(BaseModel):
@@ -39,21 +41,21 @@ class Image_label(BaseModel):
     download: bool
 
 @router.put("/post_resultat") 
-async def post_resultat(data: ImageData): 
+async def post_resultat(data: ImageData,current_user: SystemUser = Depends(get_current_user)): 
     print('post_resultat') 
     print(data) 
     image_data = MongoAccess().phind_path(data.path)
     print('imagedata',image_data)
-    if image_data ==None:
+    if image_data is None:
         image = MongoAccess().incert_image(data.dict())
+        return {"status": "success", "action": "created"}
     else: 
-        image = MongoAccess().change_label(image_data['_id'],data.regions)
-    print('bonjour')
-
+        image = MongoAccess().change_label(image_data['_id'], data.regions)
+        return {"status": "success", "action": "updated"}  
 
 
 @router.post("/image_save")
-async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...),model: str = Form(...)):   
+async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...),model: str = Form(...),current_user: SystemUser = Depends(get_current_user)):   
     try:
         contents = await file.read() # Lecture ducontenu du fichier
         print('image_save ',file.filename)
@@ -81,19 +83,23 @@ async def image_save_on_bucket(file: UploadFile = File(...),path: str = Form(...
 
 
 @router.post("/image_search")
-async def image_search(path: str = Form(...)): 
+async def image_search(path: str = Form(...),current_user: SystemUser = Depends(get_current_user)): 
     print("image_search")
-    print('path=',path)
+    print('path=', path)
 
     image_data = MongoAccess().phind_path(path)
-    print('image data',image_data) 
-    if image_data == None:
-        return Response(status_code=404)
-    return  json_util.dumps(image_data)
+    print('image data', image_data) 
+    if image_data is None:
+        return Response(status_code=404)  # Use 404 instead of 401 for not found
+        # Convert ObjectId to string
+    if '_id' in image_data:
+        image_data['_id'] = str(image_data['_id'])
+
+    return JSONResponse(content=image_data, status_code=200)
 
  
 @router.post("/labels")
-async def image_labels(data: Image_label): 
+async def image_labels(data: Image_label,current_user: SystemUser = Depends(get_current_user)): 
     data_label = MongoAccess().phind_dir_uuid(data.projet_name,data.uuid) 
     if data.download == False:
         print(data_label)
