@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timedelta
-from freezegun import freeze_time
 from jose import jwt, JWTError
 from fastapi import HTTPException
 from pydantic_settings import BaseSettings
