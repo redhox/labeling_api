@@ -32,3 +32,4 @@ PyJWT
 pytest 
 pytest-asyncio
 httpx 
+pydantic-settings
