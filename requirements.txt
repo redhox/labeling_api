@@ -30,4 +30,5 @@ prometheus_client
 prometheus-fastapi-instrumentator
 PyJWT
 pytest 
-pytest-asyncio..httpx 
+pytest-asyncio
+httpx 
