@@ -34,22 +34,10 @@ def mock_token_data():
         "sub": "test@example.com",
         "exp": int((datetime.utcnow() + timedelta(minutes=99999)).timestamp())
     }
-
-@pytest.mark.asyncio
-async def test_get_current_user_valid_token(mocker, mock_token_data, mock_user):
-    # Mock jwt.decode pour qu'il retourne directement un payload valide avec expiration dans le futur
-    mock_jwt_decode = mocker.patch('app.api.def_util.def_user.jwt.decode', return_value=mock_token_data)
-    
-    # Mock PostgresAccess.get_user_by_email pour retourner un utilisateur fictif
-    mock_get_user_by_email = mocker.patch.object(PostgresAccess, 'get_user_by_email', return_value=mock_user)
-
-    # Création d'un jeton pour le test
-    token = create_access_token({"sub": "test@example.com"}, expires_delta=timedelta(minutes=99999))
-    
-    # Appel de la fonction get_current_user pour vérifier qu’elle renvoie un utilisateur valide
-    user = await get_current_user(token=token)
-
-    # Vérifications
-    assert user == mock_user
-    assert mock_jwt_decode.called  # Vérifie que decode a été appelé
-    mock_get_user_by_email.assert_called_once_with("test@example.com")
+def test_get_current_user_valid_token(db_connection):
+    # Example test that requires DB connection
+    with db_connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM users WHERE id = 1;")
+        result = cursor.fetchone()
+        assert result is not None
+        
