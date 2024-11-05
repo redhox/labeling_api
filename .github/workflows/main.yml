@@ -8,6 +8,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest 
+       
+    services:
+      postgres:
+        image: postgres:13 
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
 
     steps:
       - name: Checkout code
