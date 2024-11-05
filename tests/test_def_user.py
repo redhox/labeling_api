@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 from pydantic import BaseModel ,EmailStr
 import pytest
 from unittest.mock import Mock, patch
-
+import multipart
 # Importation des fonctions et variables à tester
 from app.api.def_util.def_user import (
     get_user, get_db_access, create_access_token, get_current_user,
