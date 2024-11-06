@@ -21,6 +21,7 @@ from fastapi import HTTPException, status
 # Importation des fonctions et variables à tester
 from app.api.def_util.def_user import (
     get_current_user, create_access_token, SECRET_KEY, ALGORITHM, PostgresAccess
+)
 import pytest
 from datetime import datetime, timedelta
 from app.api.def_util.def_user import (
