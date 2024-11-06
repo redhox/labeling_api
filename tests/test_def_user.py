@@ -34,16 +34,12 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timedelta
 import os
+import pytest
+from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta
 
-# Ensure no environment variables for database configuration exist
-os.environ["DB_NAME"] = ""
-os.environ["DB_USER"] = ""
-os.environ["DB_PASSWORD"] = ""
-os.environ["DB_HOST"] = ""
-
-# Patch `PostgresAccess` at the module level before importing anything that uses it
+# Appliquer le patch global sur PostgresAccess avant d'importer les fonctions cibles
 with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
-    # Configure the mock to return a controlled result set
     mock_conn = MockPostgresAccess.return_value
     mock_cursor = mock_conn.cursor.return_value
     mock_cursor.fetchone.return_value = {
@@ -52,7 +48,7 @@ with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
         "username": "testuser"
     }
 
-    # Import the functions under test
+    # Importer les fonctions et variables nécessaires une fois que le mock est en place
     from app.api.def_util.def_user import get_current_user, create_access_token
 
 @pytest.fixture
@@ -61,17 +57,17 @@ def mock_user():
 
 @pytest.fixture
 def mock_token_data():
-    # Simulate a valid token with a future expiration
+    # Simuler un token valide avec une expiration future
     return {
         "sub": "test@example.com",
         "exp": int((datetime.utcnow() + timedelta(minutes=99999)).timestamp())
     }
 
-@pytest.mark.usefixtures("mock_postgres_access")
 def test_get_current_user_valid_token():
-    # The mock is automatically applied here
+    # Le mock est maintenant activé, le test ne tentera pas de se connecter réellement
     with mock_conn.cursor() as cursor:
         cursor.execute("SELECT * FROM users WHERE id = 1;")
         result = cursor.fetchone()
         assert result is not None
         assert result["email"] == "test@example.com"
+
