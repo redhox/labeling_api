@@ -38,46 +38,25 @@ import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
+import pytest
+from app.api.def_util.def_user import PostgresAccess
 
-class PostgresAccess:
-    def __init__(self):
-        self.conn = psycopg2.connect(
-            dbname=os.getenv("DB_NAME", "testdb"),
-            user=os.getenv("DB_USER", "testuser"),
-            password=os.getenv("DB_PASSWORD", "testpassword"),
-            host=os.getenv("DB_HOST", "localhost"),
-            port=os.getenv("DB_PORT", "5432")
-        )
-# Appliquer le patch global sur PostgresAccess avant d'importer les fonctions cibles
-with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
-    mock_conn = MockPostgresAccess.return_value
-    mock_cursor = mock_conn.cursor.return_value
-    mock_cursor.fetchone.return_value = {
-        "id": 1,
-        "email": "test@example.com",
-        "username": "testuser"
-    }
-
-    # Importer les fonctions et variables nécessaires une fois que le mock est en place
-    from app.api.def_util.def_user import get_current_user, create_access_token
+def test_postgresaccess():
+    with pytest.raises(psycopg2.Error):
+        PostgresAccess()
 
 @pytest.fixture
-def mock_user():
-    return {"email": "test@example.com", "username": "testuser"}
+def mock_postgres():
+    with patch("psycopg2.connect") as mock_connect:
+        mock_connect.return_value = mock.Mock()
+        mock_connect.return_value.cursor.return_value.fetchone.return_value = {
+            "id": 1,
+            "email": "test@example.com",
+            "username": "testuser"
+        }
+        yield mock_connect
 
-@pytest.fixture
-def mock_token_data():
-    # Simuler un token valide avec une expiration future
-    return {
-        "sub": "test@example.com",
-        "exp": int((datetime.utcnow() + timedelta(minutes=99999)).timestamp())
-    }
-
-def test_get_current_user_valid_token():
-    # Le mock est maintenant activé, le test ne tentera pas de se connecter réellement
-    with mock_conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM users WHERE id = 1;")
-        result = cursor.fetchone()
-        assert result is not None
-        assert result["email"] == "test@example.com"
-
+def test_get_current_user(mock_postgres):
+    with mock_postgres:
+        user = PostgresAccess().get_current_user()
+        assert user["email"] == "test@example.com"
