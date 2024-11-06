@@ -28,6 +28,18 @@ from app.api.def_util.def_user import (
     get_current_user, create_access_token, SECRET_KEY, ALGORITHM, PostgresAccess
 )
 
+from unittest.mock import MagicMock, patch
+# Mock PostgresAccess at the module level, so it’s replaced in all imports
+with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
+    # Configure the mock to avoid any real database connection attempts
+    mock_conn = MockPostgresAccess.return_value
+    mock_cursor = mock_conn.cursor.return_value
+    mock_cursor.fetchone.return_value = {"id": 1, "email": "test@example.com", "username": "testuser"}
+    
+    # Import the functions and variables to test after setting up the mock
+    from app.api.def_util.def_user import (
+        get_current_user, create_access_token, SECRET_KEY, ALGORITHM
+    )
 
 @pytest.fixture
 def mock_user():
@@ -43,13 +55,8 @@ def mock_token_data():
 
 @pytest.fixture
 def db_connection():
-    # Mock the PostgresAccess connection to avoid using a real database
-    with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
-        mock_conn = MockPostgresAccess.return_value
-        mock_cursor = mock_conn.cursor.return_value
-        # Simulate a return value for fetchone()
-        mock_cursor.fetchone.return_value = {"id": 1, "email": "test@example.com", "username": "testuser"}
-        yield mock_conn  # Yielding the mock connection object
+    # Yield the mock connection object
+    yield mock_conn  
 
 def test_get_current_user_valid_token(db_connection):
     # Test that requires db_connection but uses the mocked version
@@ -58,3 +65,4 @@ def test_get_current_user_valid_token(db_connection):
         result = cursor.fetchone()
         assert result is not None
         assert result["email"] == "test@example.com"
+
