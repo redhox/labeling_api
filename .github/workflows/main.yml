@@ -31,7 +31,7 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
-          export PYTHONPATH=$PYTHONPATH: ./
+          export PYTHONPATH=$PYTHONPATH:/home/runner/work/labeling_api/labeling_api
           pytest tests/test_def_user.py -vv --capture=no
 
   deploy:
