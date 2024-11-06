@@ -22,7 +22,6 @@ from fastapi import HTTPException, status
 from app.api.def_util.def_user import (
     get_current_user, create_access_token, SECRET_KEY, ALGORITHM, PostgresAccess
 )
-import pytest
 from datetime import datetime, timedelta
 from app.api.def_util.def_user import (
     get_current_user, create_access_token, SECRET_KEY, ALGORITHM, PostgresAccess
@@ -30,12 +29,9 @@ from app.api.def_util.def_user import (
 
 from unittest.mock import MagicMock, patch
 # Mock PostgresAccess at the module level, so it’s replaced in all imports
-from unittest.mock import MagicMock, patch
 import pytest
 from datetime import datetime, timedelta
-import os
 from unittest.mock import MagicMock, patch
-import pytest
 from datetime import datetime, timedelta
 import os
 
