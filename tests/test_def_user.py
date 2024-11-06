@@ -38,6 +38,15 @@ import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
+class PostgresAccess:
+    def __init__(self):
+        self.conn = psycopg2.connect(
+            dbname=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            host=os.getenv("DB_HOST"),
+            port=os.getenv("DB_PORT")
+        )
 # Appliquer le patch global sur PostgresAccess avant d'importer les fonctions cibles
 with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
     mock_conn = MockPostgresAccess.return_value
