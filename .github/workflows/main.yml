@@ -33,7 +33,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt  
 
-      - name: Wait for PostgreSQL to be ready
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
+      - name: Run tests
+
         run: |
           curl -s https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh > wait-for-it.sh
           chmod +x wait-for-it.sh
