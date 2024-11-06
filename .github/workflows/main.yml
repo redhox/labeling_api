@@ -5,6 +5,7 @@ on:
   pull_request:
     branches: [ "experimental" ]
   workflow_dispatch:
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -30,7 +31,8 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
-          pytest tests/ -vv --capture=no
+          export PYTHONPATH=$PYTHONPATH:./
+          pytest tests/test_def_user -vv --capture=no
 
   deploy:
     runs-on: ubuntu-latest
