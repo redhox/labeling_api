@@ -23,7 +23,7 @@ jobs:
           --health-cmd="pg_isready -U testuser"
           --health-interval=10s 
           --health-timeout=5s 
-          --health-retries=5
+          --health-retries=5   # S'assurer qu'il n'y a pas de retour à la ligne
 
     steps:
       - name: Checkout code
@@ -61,7 +61,6 @@ jobs:
           DB_NAME: testdb
         run: |
           pytest --disable-warnings -v tests/test_def_user.py
-
 
 
   deploy:
