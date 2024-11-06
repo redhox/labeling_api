@@ -19,17 +19,16 @@ jobs:
           POSTGRES_DB: testdb
         ports:
           - 5432:5432
-        # Optionally, you can set health checks, but let's leave out the custom health-cmd for now:
-        # options: > 
-        #   --health-cmd="pg_isready -U testuser" 
-        #   --health-interval=10s 
-        #   --health-timeout=5s 
-        #   --health-retries=5
+        options: > 
+          --health-cmd="pg_isready -U testuser"
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2  
-    
+
       - name: Set up Python
         uses: actions/setup-python@v2 
         with:
@@ -39,9 +38,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt  
-
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -65,7 +61,6 @@ jobs:
           DB_NAME: testdb
         run: |
           pytest --disable-warnings -v tests/test_def_user.py
-
 
 
 
