@@ -46,6 +46,19 @@ import pytest
 from unittest.mock import MagicMock
 from app.api.def_util.def_user import PostgresAccess
 
+
+
+import unittest.mock as mock
+
+class PostgresAccess:
+    def __init__(self):
+        self.conn = mock.Mock()
+        self.cursor = self.conn.cursor.return_value
+        self.cursor.fetchone.return_value = {
+            "id": 1,
+            "email": "test@example.com",
+            "username": "testuser"
+        }
 def test_postgresaccess():
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
