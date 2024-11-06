@@ -13,7 +13,7 @@ from app.api.def_util.def_user import (
     get_user, get_db_access, create_access_token, get_current_user,
     SECRET_KEY, ALGORITHM, SystemUser, PostgresAccess
 )
-import pytest
+
 from datetime import datetime, timedelta
 from jose import jwt
 from fastapi import HTTPException, status
