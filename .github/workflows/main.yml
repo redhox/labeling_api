@@ -32,7 +32,7 @@ jobs:
           DB_PORT: 5432
         run: |
           export PYTHONPATH=$PYTHONPATH: .
-          pytest tests/test_def_user -vv --capture=no
+          pytest tests/test_def_user.py -vv --capture=no
 
   deploy:
     runs-on: ubuntu-latest
