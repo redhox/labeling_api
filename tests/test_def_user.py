@@ -42,13 +42,30 @@ import pytest
 from unittest.mock import MagicMock
 from app.api.def_util.def_user import PostgresAccess
 
+import pytest
+from unittest.mock import MagicMock
+from app.api.def_util.def_user import PostgresAccess
+
 def test_postgresaccess():
     mock_conn = MagicMock()
-    mock_conn.cursor.return_value.fetchone.return_value = {
+    mock_cursor = MagicMock()
+    mock_cursor.fetchone.return_value = {
         "id": 1,
         "email": "test@example.com",
         "username": "testuser"
     }
+    
+    # Simuler la méthode cursor()
+    mock_conn.cursor.return_value = mock_cursor
+    
+    # Simuler la méthode execute()
+    mock_conn.execute = lambda *args, **kwargs: None
+    
+    # Simuler la méthode fetchone()
+    mock_conn.fetchone = lambda self: mock_cursor.fetchone().fetchall()[0]
+    
+    # Simuler la méthode close()
+    mock_conn.close = lambda: None
     
     with patch("psycopg2.connect", return_value=mock_conn):
         postgress_access = PostgresAccess()
@@ -58,11 +75,23 @@ def test_postgresaccess():
 @pytest.fixture
 def mock_postgres():
     mock_conn = MagicMock()
-    mock_conn.cursor.return_value.fetchone.return_value = {
+    mock_cursor = MagicMock()
+    
+    # Simuler la méthode cursor()
+    mock_conn.cursor.return_value = mock_cursor
+    
+    # Simuler les méthodes de cursor()
+    mock_cursor.fetchone.return_value = {
         "id": 1,
         "email": "test@example.com",
         "username": "testuser"
     }
+    mock_cursor.fetchall.return_value = []
+    mock_cursor.close.return_value = None
+    
+    # Simuler la méthode close()
+    mock_conn.close.return_value = None
+    
     with patch("psycopg2.connect", return_value=mock_conn):
         yield mock_conn
 
