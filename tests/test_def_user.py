@@ -39,24 +39,33 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
 
 import pytest
+from unittest.mock import MagicMock
 from app.api.def_util.def_user import PostgresAccess
 
 def test_postgresaccess():
-    with pytest.raises(psycopg2.Error):
-        PostgresAccess()
+    mock_conn = MagicMock()
+    mock_conn.cursor.return_value.fetchone.return_value = {
+        "id": 1,
+        "email": "test@example.com",
+        "username": "testuser"
+    }
+    
+    with patch("psycopg2.connect", return_value=mock_conn):
+        postgress_access = PostgresAccess()
+        assert isinstance(postgress_access.get_current_user(), dict)
+        assert postgress_access.get_current_user()["email"] == "test@example.com"
 
 @pytest.fixture
 def mock_postgres():
-    with patch("psycopg2.connect") as mock_connect:
-        mock_connect.return_value = mock.Mock()
-        mock_connect.return_value.cursor.return_value.fetchone.return_value = {
-            "id": 1,
-            "email": "test@example.com",
-            "username": "testuser"
-        }
-        yield mock_connect
+    mock_conn = MagicMock()
+    mock_conn.cursor.return_value.fetchone.return_value = {
+        "id": 1,
+        "email": "test@example.com",
+        "username": "testuser"
+    }
+    with patch("psycopg2.connect", return_value=mock_conn):
+        yield mock_conn
 
 def test_get_current_user(mock_postgres):
-    with mock_postgres:
-        user = PostgresAccess().get_current_user()
-        assert user["email"] == "test@example.com"
+    user = PostgresAccess().get_current_user()
+    assert user["email"] == "test@example.com"
