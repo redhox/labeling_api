@@ -28,6 +28,7 @@ from app.api.def_util.def_user import (
     get_current_user, create_access_token, SECRET_KEY, ALGORITHM, PostgresAccess
 )
 
+
 @pytest.fixture
 def mock_user():
     return {"email": "test@example.com", "username": "testuser"}
@@ -42,14 +43,16 @@ def mock_token_data():
 
 @pytest.fixture
 def db_connection():
-    # Simulate or set up the database connection here, or use a mock
-    connection = MagicMock()
-    cursor = connection.cursor.return_value
-    cursor.fetchone.return_value = {"id": 1, "email": "test@example.com", "username": "testuser"}
-    return connection
+    # Mock the PostgresAccess connection to avoid using a real database
+    with patch("app.api.def_util.def_user.PostgresAccess") as MockPostgresAccess:
+        mock_conn = MockPostgresAccess.return_value
+        mock_cursor = mock_conn.cursor.return_value
+        # Simulate a return value for fetchone()
+        mock_cursor.fetchone.return_value = {"id": 1, "email": "test@example.com", "username": "testuser"}
+        yield mock_conn  # Yielding the mock connection object
 
 def test_get_current_user_valid_token(db_connection):
-    # Simulate a database test that uses db_connection
+    # Test that requires db_connection but uses the mocked version
     with db_connection.cursor() as cursor:
         cursor.execute("SELECT * FROM users WHERE id = 1;")
         result = cursor.fetchone()
