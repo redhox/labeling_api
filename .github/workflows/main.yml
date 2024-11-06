@@ -30,12 +30,6 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
-          docker run --rm \
-            -e POSTGRES_DB=${{ env.DB_NAME }} \
-            -e POSTGRES_USER=${{ env.DB_USER }} \
-            -e POSTGRES_PASSWORD=${{ env.DB_PASSWORD }} \
-            -p 5432:5432 \
-            postgres:13-alpine
           pytest tests/ -vv --capture=no
 
   deploy:
