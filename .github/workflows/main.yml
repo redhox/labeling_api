@@ -31,7 +31,7 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
         run: |
-          export PYTHONPATH=$PYTHONPATH:./
+          export PYTHONPATH=$PYTHONPATH:.
           pytest tests/test_def_user -vv --capture=no
 
   deploy:
