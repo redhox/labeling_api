@@ -1,12 +1,10 @@
 name: mlflow application
 on:
   push:
-    branches: [ "experimental" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "experimental" ]
+    branches: [ "main" ]
   workflow_dispatch:
-l
-
 
 jobs:
   test:
