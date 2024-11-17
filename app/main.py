@@ -18,7 +18,7 @@ import logging
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 import os
 from dotenv import load_dotenv
-
+from fastapi.responses import PlainTextResponse
 
 # from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 # from jose import JWTError, jwt
