@@ -70,6 +70,10 @@ async def record_request(request: Request, call_next):
         requests_total.inc()
     response = await call_next(request)
     return response
+@app.get("/metrics", response_class=PlainTextResponse)
+async def metrics():
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
 
 @app.get("/")
 async def root():
