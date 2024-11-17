@@ -15,7 +15,7 @@ from app.connector.connectorBDD_user import PostgresAccess
 from app.connector.connectorBDD_image import MongoAccess
 from app.connector.connectorBucket import MinioBucketManager
 import logging
-
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 import os
 from dotenv import load_dotenv
 
