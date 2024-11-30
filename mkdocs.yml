@@ -1,0 +1,32 @@
+site_name: "Documentation de l'API FastAPI"
+site_description: "Documentation du projet FastAPI"
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - API:
+      - Introduction: api/index.md
+      - Endpoints:
+          - Images: api/endpoints/images.md
+          - Users: api/endpoints/users.md
+          - Models: api/endpoints/models.md
+      - Utils:
+          - User Utilities: api/def_util/def_user.md
+      - Connection:
+          - User: connector/postgresaccess.md
+          - Image: connector/mongoaccess.md
+          - Bucket: connector/minio_bucket_manager.md
+          - Mlflow: connector/mlflow_connect.md
+  - Configuration:
+      - Docker: config/docker.md
+      - Base de Données: config/database.md
+  - Tests: tests/index.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
